@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.board">
+	<resultMap id="articlesResult" type="articleVO">
+		<result property="level" column="level" />
+		<result property="articleNO" column="articleNO" />
+		<result property="parentNO" column="parentNO" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="writeDate" column="writeDate" />
+		<result property="imageFileName" column="imageFileName" />
+	</resultMap>
+
+	<!-- <resultMap id="imgResult" type="imageVO"> <result property="imageFileNO" column="imageFileNO" /> <result property="articleNO" column="articleNO" 
+		/> <result property="imageFileName" column="imageFileName" /> </resultMap> -->
+
+	<!-- 모든 게시글 조회 -->
+	<select id="selectAllArticlesList" resultMap="articlesResult">
+    <![CDATA[
+      SELECT level, articleNO, parentNO, title, content, writeDate, imageFileName, id
+      from t_board
+      START WITH  parentNO=0
+      CONNECT BY PRIOR articleNO=parentNO 
+      ORDER SIBLINGS BY articleNO DESC		
+    ]]>
+	</select>
+
+	<!-- 새 글 등록 -->
+	<insert id="insertNewArticle" parameterType="java.util.Map">
+		<![CDATA[
+			INSERT INTO t_board(articleNO, title, content, imageFileName, id)
+			VALUES(#{articleNO}, #{title}, #{content}, #{imageFileName}, #{id})
+		]]>
+	</insert>
+
+
+	<!-- 추가하는 새 글에 대한 글 번호를 가져옴 -->
+	<select id="selectNewArticleNO" resultType="int">
+		<![CDATA[
+			SELECT nvl(max(articleNO, 0) + 1 from t_board
+		]]>
+	</select>
+
+
+	<!-- 글 상세창 -->
+	<select id="selectArticle" resultType="articleVO" parameterType="int">
+		<![CDATA[
+			SELECT * FROM t_board WHERE articleNO = #{articleNO}
+		]]>
+	</select>
+
+</mapper>
